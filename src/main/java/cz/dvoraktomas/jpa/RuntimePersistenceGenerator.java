@@ -71,9 +71,7 @@ public class RuntimePersistenceGenerator {
         final Document doc = createXmlDocument();
         final Element persistence = createPersistenceElement(doc);
         doc.appendChild(persistence);
-        final Element unit = doc.createElement("persistence-unit");
-        unit.setAttribute("name", unitName);
-        unit.setAttribute("transaction-type", transactionType.name());
+        final Element unit = createPersistenceUnitElement(doc);
         persistence.appendChild(unit);
         unit.appendChild(createProviderElement(doc, provider.getName()));
 
@@ -82,11 +80,19 @@ public class RuntimePersistenceGenerator {
             classElement.setTextContent(clazz.getName());
             unit.appendChild(classElement);
         }
+
         if (!properties.isEmpty()) {
             final Element propertiesElement = createPropertiesElement(doc);
             unit.appendChild(propertiesElement);
         }
         return doc;
+    }
+
+    private Element createPersistenceUnitElement(Document doc) {
+        final Element unit = doc.createElement("persistence-unit");
+        unit.setAttribute("name", unitName);
+        unit.setAttribute("transaction-type", transactionType.name());
+        return unit;
     }
 
     private Element createPropertiesElement(Document doc) {
