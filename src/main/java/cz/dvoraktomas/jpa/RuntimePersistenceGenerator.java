@@ -41,11 +41,11 @@ public class RuntimePersistenceGenerator {
 
     public RuntimePersistenceGenerator addProperty(final String key, final String value) {
 
-        if(key == null) {
+        if (key == null) {
             throw new IllegalArgumentException("Property key cannot be null");
         }
 
-        if(value == null) {
+        if (value == null) {
             throw new IllegalArgumentException("Property value cannot be null");
         }
         properties.put(key, value);
@@ -59,12 +59,12 @@ public class RuntimePersistenceGenerator {
 
     public EntityManagerFactory createEntityManagerFactory() {
         try {
-            final String persistenceContent = generateXml(createDocument());
+            final String persistenceContent = generateXml();
             attachToClassloader(persistenceContent);
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
-        return Persistence.createEntityManagerFactory(this.unitName, properties);
+        return Persistence.createEntityManagerFactory(this.unitName);
     }
 
     protected Document createDocument() throws ParserConfigurationException {
@@ -82,7 +82,27 @@ public class RuntimePersistenceGenerator {
             classElement.setTextContent(clazz.getName());
             unit.appendChild(classElement);
         }
+        if (!properties.isEmpty()) {
+            final Element propertiesElement = createPropertiesElement(doc);
+            unit.appendChild(propertiesElement);
+        }
         return doc;
+    }
+
+    private Element createPropertiesElement(Document doc) {
+        final Element propertiesElement = doc.createElement("properties");
+        for (final Map.Entry<String, String> entry : properties.entrySet()) {
+            final Element property = createProperty(doc, entry);
+            propertiesElement.appendChild(property);
+        }
+        return propertiesElement;
+    }
+
+    private Element createProperty(Document doc, Map.Entry<String, String> entry) {
+        final Element property = doc.createElement("property");
+        property.setAttribute("name", entry.getKey());
+        property.setAttribute("value", entry.getValue());
+        return property;
     }
 
     protected Element createPersistenceElement(final Document doc) {
@@ -136,7 +156,8 @@ public class RuntimePersistenceGenerator {
         return Files.createFile(metaDir.resolve("persistence.xml"));
     }
 
-    protected String generateXml(final Document doc) throws TransformerException {
+    protected String generateXml() throws TransformerException, ParserConfigurationException {
+        final Document doc = createDocument();
         final TransformerFactory transformerFactory = TransformerFactory.newInstance();
         final Transformer transformer = transformerFactory.newTransformer();
         final DOMSource source = new DOMSource(doc);
