@@ -38,4 +38,14 @@ public class RuntimePersistenceGeneratorTest {
         String expected = textContent.replaceAll("\\n\\s*", "");
         Assert.assertEquals(expected, generator.toString());
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testIllegalPropertyKey() throws Exception {
+        generator.addProperty(null, "value");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testIllegalPropertyValue() throws Exception {
+        generator.addProperty("key", null);
+    }
 }
