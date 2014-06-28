@@ -26,11 +26,12 @@ generator.addProperty("hibernate.show_sql", "true");
 generator.addProperty("hibernate.connection.shutdown", "true");
 generator.addProperty("hibernate.hbm2ddl.auto", "create-drop");
 
-generator.addAnnotatedClass(TestObject.class);
+generator.addAnnotatedClass(User.class);
+generator.addAnnotatedClass(Message.class);
 
 EntityManagerFactory entityManagerFactory = generator.createEntityManagerFactory();
 final EntityManager em = entityManagerFactory.createEntityManager();
 ```
 
 ## How is it working?
-The main trick is hacked classloader, that will provide own generated temp file, when java asks for `persistence.xml`. 
+The main trick is hacked classloader, that provides own generated temp file, when java asks for `persistence.xml`. 
