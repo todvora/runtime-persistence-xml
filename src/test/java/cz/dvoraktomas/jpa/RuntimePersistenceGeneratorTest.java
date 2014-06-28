@@ -36,6 +36,6 @@ public class RuntimePersistenceGeneratorTest {
         URI persistenceXmlPath = this.getClass().getResource("/persistence.xml").toURI();
         String textContent = new String(Files.readAllBytes(Paths.get(persistenceXmlPath)));
         String expected = textContent.replaceAll("\\n\\s*", "");
-        Assert.assertEquals(expected, generator.generateXml());
+        Assert.assertEquals(expected, generator.toString());
     }
 }

@@ -172,4 +172,13 @@ public class RuntimePersistenceGenerator {
         transformer.transform(source, result);
         return writer.toString();
     }
+
+    @Override
+    public String toString() {
+        try {
+            return generateXml();
+        } catch (TransformerException | ParserConfigurationException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
