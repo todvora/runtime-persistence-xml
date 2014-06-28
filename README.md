@@ -13,7 +13,7 @@ Usage is simple - just configure unit name, transaction type and persistence pro
 
 You can get EntityManagerFactory directly from generator, calling method `createEntityManagerFactory()`. It is also possible to get XML in form, that is compatible with XML representation stored in `persistence.xml` by calling `generator.toString()`.
 
-```
+```java
 RuntimePersistenceGenerator generator = new RuntimePersistenceGenerator("test", PersistenceUnitTransactionType.RESOURCE_LOCAL, HibernatePersistenceProvider.class);
 
 generator.addProperty("javax.persistence.jdbc.driver", "org.hsqldb.jdbcDriver");
