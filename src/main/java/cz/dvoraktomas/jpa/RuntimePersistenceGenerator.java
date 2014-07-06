@@ -58,13 +58,16 @@ public class RuntimePersistenceGenerator {
     }
 
     public EntityManagerFactory createEntityManagerFactory() {
+        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             final String persistenceContent = generateXml();
-            attachToClassloader(persistenceContent);
+            Thread.currentThread().setContextClassLoader(createClassLoader(persistenceContent));
+            return Persistence.createEntityManagerFactory(this.unitName);
         } catch (final Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            Thread.currentThread().setContextClassLoader(originalClassLoader);
         }
-        return Persistence.createEntityManagerFactory(this.unitName);
     }
 
     protected Document createDocument() throws ParserConfigurationException {
@@ -98,13 +101,13 @@ public class RuntimePersistenceGenerator {
     private Element createPropertiesElement(Document doc) {
         final Element propertiesElement = doc.createElement("properties");
         for (final Map.Entry<String, String> entry : properties.entrySet()) {
-            final Element property = createProperty(doc, entry);
+            final Element property = createPropertyElement(doc, entry);
             propertiesElement.appendChild(property);
         }
         return propertiesElement;
     }
 
-    private Element createProperty(Document doc, Map.Entry<String, String> entry) {
+    private Element createPropertyElement(Document doc, Map.Entry<String, String> entry) {
         final Element property = doc.createElement("property");
         property.setAttribute("name", entry.getKey());
         property.setAttribute("value", entry.getValue());
@@ -132,12 +135,10 @@ public class RuntimePersistenceGenerator {
         return docBuilder.newDocument();
     }
 
-    protected RuntimePersistenceGenerator attachToClassloader(final String persistenceContent) {
-        Thread.currentThread().setContextClassLoader(new ClassLoader() {
-
+    protected ClassLoader createClassLoader(final String persistenceContent) {
+        return new ClassLoader() {
             @Override
             protected Enumeration<URL> findResources(final String name) throws IOException {
-
                 if ("META-INF/persistence.xml".equals(name)) {
                     // lets hack it
                     final Path file = getTempFile();
@@ -151,8 +152,7 @@ public class RuntimePersistenceGenerator {
                 }
                 return super.findResources(name);
             }
-        });
-        return this;
+        };
     }
 
     private Path getTempFile() throws IOException {
